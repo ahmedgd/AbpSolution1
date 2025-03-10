@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+    container_name: abpsolution1-web-container
+    ports:
+      - "8080:80"  
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - abp_network
+    depends_on:
+      - db 
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: abpsolution1-db-container
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Passw0rd
+    ports:
+      - "1433:1433"  #  SQL Server
+    networks:
+      - abp_network
+    healthcheck:
+      test: ["CMD", "sqlcmd", "-U", "sa", "-P", "YourStrong!Passw0rd", "-Q", "SELECT 1"]
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+
+networks:
+  abp_network:
+    driver: bridge
